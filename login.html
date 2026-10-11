@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Library Management System</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <!-- Custom Theme CSS -->
+  <link href="css/style.css" rel="stylesheet">
+</head>
+<body class="auth-page">
+
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="auth-logo">
+        <i class="bi bi-book-half"></i>
+      </div>
+      <h1 class="auth-title">Library Management</h1>
+      <p class="auth-subtitle">Sign in to access your administrative dashboard</p>
+    </div>
+
+    <div class="auth-body">
+      <div id="login-alert" class="alert alert-danger py-2 mb-3 d-none" role="alert"></div>
+
+      <form id="login-form">
+        <div class="mb-3">
+          <label for="username" class="form-label fw-semibold">Username</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+            <input type="text" class="form-control" id="username" placeholder="Enter your username" required autofocus>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="password" class="form-label fw-semibold">Password</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="bi bi-lock"></i></span>
+            <input type="password" class="form-control" id="password" placeholder="Enter your password" required>
+            <button class="btn btn-outline-secondary" type="button" id="toggle-password" title="Show/Hide password">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold" id="btn-submit-login">
+          <span class="spinner-border spinner-border-sm me-2 d-none" id="login-spinner"></span>
+          <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+        </button>
+      </form>
+
+      <!-- Quick Demo Credentials Box -->
+      <div class="demo-credentials-box">
+        <div class="demo-title">
+          <i class="bi bi-shield-lock-fill text-primary"></i> Quick Demo Access
+        </div>
+        <p class="text-muted small mb-2">Click below to auto-fill development credentials:</p>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-sm btn-outline-primary flex-fill" onclick="fillCredentials('admin', 'admin123')">
+            <i class="bi bi-person-fill-gear me-1"></i> Admin Demo
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary flex-fill" onclick="fillCredentials('librarian', 'admin123')">
+            <i class="bi bi-person-badge me-1"></i> Librarian Demo
+          </button>
+        </div>
+      </div>
+
+      <div class="text-center mt-3 pt-2 border-top">
+        <span class="text-muted small">Need an account?</span>
+        <a href="register.html" class="small fw-semibold ms-1 text-decoration-none">Register Staff Member</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    // Password visibility toggle
+    document.getElementById("toggle-password").addEventListener("click", function() {
+      const pwdInput = document.getElementById("password");
+      const icon = this.querySelector("i");
+      if (pwdInput.type === "password") {
+        pwdInput.type = "text";
+        icon.className = "bi bi-eye-slash";
+      } else {
+        pwdInput.type = "password";
+        icon.className = "bi bi-eye";
+      }
+    });
+
+    function fillCredentials(user, pass) {
+      document.getElementById("username").value = user;
+      document.getElementById("password").value = pass;
+    }
+
+    // Login Form Submit
+    document.getElementById("login-form").addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value;
+      const alertBox = document.getElementById("login-alert");
+      const submitBtn = document.getElementById("btn-submit-login");
+      const spinner = document.getElementById("login-spinner");
+
+      alertBox.classList.add("d-none");
+      submitBtn.disabled = true;
+      spinner.classList.remove("d-none");
+
+      try {
+        const response = await api.post("/auth/login", { username, password });
+
+        if (response && response.success && response.data) {
+          const authData = response.data;
+          auth.setAuth(authData.token, {
+            username: authData.username,
+            fullName: authData.fullName,
+            email: authData.email,
+            role: authData.role
+          });
+
+          showToast("success", "Welcome!", `Signed in as ${authData.fullName}`);
+          setTimeout(() => {
+            window.location.href = "index.html";
+          }, 400);
+        } else {
+          throw new Error(response.message || "Login failed");
+        }
+      } catch (error) {
+        alertBox.textContent = error.message || "Invalid username or password";
+        alertBox.classList.remove("d-none");
+        submitBtn.disabled = false;
+        spinner.classList.add("d-none");
+      }
+    });
+  </script>
+</body>
+</html>

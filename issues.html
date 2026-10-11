@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Issue Books - Library Management System</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <!-- Custom Theme CSS -->
+  <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+
+  <div class="app-container">
+    <div class="sidebar-backdrop"></div>
+
+    <!-- Sidebar Navigation Menu -->
+    <aside class="app-sidebar">
+      <a href="index.html" class="sidebar-brand">
+        <i class="bi bi-book-half"></i>
+        <span>Library<span class="text-primary-emphasis" style="color: #60a5fa !important;">MS</span></span>
+      </a>
+
+      <ul class="sidebar-nav">
+        <li class="nav-section-title">Core Management</li>
+        <li>
+          <a href="index.html" class="nav-link">
+            <i class="bi bi-grid-1x2-fill"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li>
+          <a href="books.html" class="nav-link">
+            <i class="bi bi-book"></i>
+            <span>Books Catalog</span>
+          </a>
+        </li>
+        <li>
+          <a href="students.html" class="nav-link">
+            <i class="bi bi-people"></i>
+            <span>Students</span>
+          </a>
+        </li>
+
+        <li class="nav-section-title">Circulation</li>
+        <li>
+          <a href="issues.html" class="nav-link active">
+            <i class="bi bi-journal-arrow-up"></i>
+            <span>Issue Books</span>
+          </a>
+        </li>
+        <li>
+          <a href="fines.html" class="nav-link">
+            <i class="bi bi-clock-history"></i>
+            <span>Returns & Fines</span>
+          </a>
+        </li>
+
+        <li class="nav-section-title">Analytics</li>
+        <li>
+          <a href="reports.html" class="nav-link">
+            <i class="bi bi-bar-chart-line"></i>
+            <span>Reports & Exports</span>
+          </a>
+        </li>
+      </ul>
+
+      <!-- User Profile in Sidebar Footer -->
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="user-avatar user-avatar-display">AD</div>
+          <div class="user-info">
+            <div class="user-name user-name-display">Administrator</div>
+            <div class="user-role user-role-display">ADMIN</div>
+          </div>
+          <button class="btn btn-sm btn-link text-white-50 p-1 btn-logout" title="Sign Out">
+            <i class="bi bi-box-arrow-right fs-5"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="app-main">
+      <!-- Top Navigation Bar -->
+      <header class="app-topbar">
+        <div class="topbar-left">
+          <button class="sidebar-toggler" type="button" aria-label="Toggle navigation">
+            <i class="bi bi-list"></i>
+          </button>
+          <span class="fw-semibold text-secondary">Book Circulation Desk</span>
+        </div>
+
+        <div class="topbar-right">
+          <button class="btn btn-primary" onclick="openIssueBookModal()">
+            <i class="bi bi-journal-plus me-1"></i> Issue New Book
+          </button>
+
+          <div class="dropdown">
+            <button class="btn btn-link text-decoration-none dropdown-toggle d-flex align-items-center gap-2 p-0 text-dark" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <div class="user-avatar user-avatar-display" style="width: 34px; height: 34px; font-size: 0.85rem;">AD</div>
+              <span class="fw-semibold small d-none d-md-inline user-name-display">Administrator</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+              <li><h6 class="dropdown-header user-name-display">Administrator</h6></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-danger btn-logout" href="#"><i class="bi bi-box-arrow-right me-2"></i>Sign Out</a></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+
+      <!-- App Body Content -->
+      <main class="app-content">
+        <!-- Page Title -->
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Circulation & Issue History</h1>
+            <p class="page-subtitle">Issue titles to students, process returns, renew terms, and manage due dates</p>
+          </div>
+          <span class="badge bg-primary px-3 py-2 fs-6 rounded-pill" id="issues-count-badge">Loading...</span>
+        </div>
+
+        <!-- Filter & Search Bar Card -->
+        <div class="content-card mb-4">
+          <div class="p-3">
+            <div class="row g-2 align-items-center">
+              <div class="col-12 col-md-6 col-lg-7">
+                <div class="input-group">
+                  <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                  <input type="text" class="form-control border-start-0" id="issue-search-input" placeholder="Search by book title, ISBN, student name, or roll ID...">
+                </div>
+              </div>
+              <div class="col-12 col-md-4 col-lg-3">
+                <select class="form-select" id="issue-status-filter">
+                  <option value="">All Statuses</option>
+                  <option value="ISSUED">Currently Issued (Active)</option>
+                  <option value="OVERDUE">Overdue Borrowings</option>
+                  <option value="RETURNED">Returned & Completed</option>
+                </select>
+              </div>
+              <div class="col-12 col-md-2 col-lg-2 text-end">
+                <button class="btn btn-outline-secondary w-100" onclick="document.getElementById('issue-search-input').value=''; document.getElementById('issue-status-filter').value=''; loadIssues();">
+                  <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Issues Table Card -->
+        <div class="content-card">
+          <div class="table-responsive">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Book Title & ISBN</th>
+                  <th>Student Name & ID</th>
+                  <th>Issue Date</th>
+                  <th>Due Date</th>
+                  <th>Return Date</th>
+                  <th>Status</th>
+                  <th class="text-end">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="issues-table-body">
+                <!-- Dynamically populated by issues.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Issue Book Modal -->
+  <div class="modal fade" id="issueModal" tabindex="-1" aria-labelledby="issue-modal-title" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <form id="issue-form">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold" id="issue-modal-title">Issue Book to Student</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="issue-book-select" class="form-label fw-semibold">Select Available Book <span class="text-danger">*</span></label>
+              <select class="form-select" id="issue-book-select" required>
+                <!-- Populated dynamically -->
+              </select>
+              <div class="form-text">Only books with available copies in stock can be selected.</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="issue-student-select" class="form-label fw-semibold">Select Registered Student <span class="text-danger">*</span></label>
+              <select class="form-select" id="issue-student-select" required>
+                <!-- Populated dynamically -->
+              </select>
+              <div class="form-text">Only active students are permitted to borrow books.</div>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label for="issue-date" class="form-label fw-semibold">Issue Date <span class="text-danger">*</span></label>
+                <input type="date" class="form-control" id="issue-date" required>
+              </div>
+              <div class="col-md-6">
+                <label for="issue-due-date" class="form-label fw-semibold">Due Date <span class="text-danger">*</span></label>
+                <input type="date" class="form-control" id="issue-due-date" required>
+                <div class="form-text">Defaults to 14 days loan period.</div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="issue-notes" class="form-label fw-semibold">Notes / Purpose (Optional)</label>
+              <input type="text" class="form-control" id="issue-notes" placeholder="e.g. Semester project reference, thesis study">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="btn-save-issue">
+              <i class="bi bi-journal-check me-1"></i> Confirm Issue
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Return Book Modal -->
+  <div class="modal fade" id="returnModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form id="return-form">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold">Process Book Return</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="return-issue-id">
+
+            <div class="mb-3 bg-light p-3 rounded border">
+              <div class="small text-muted">Book Title</div>
+              <div class="fw-bold fs-6 text-dark" id="return-book-title">-</div>
+              <div class="small text-muted mt-2">Issued To</div>
+              <div class="fw-semibold text-dark" id="return-student-name">-</div>
+              <div class="small text-muted mt-2">Scheduled Due Date</div>
+              <div class="fw-semibold text-danger" id="return-due-date-display">-</div>
+            </div>
+
+            <!-- Overdue Warning Alert -->
+            <div id="return-fine-alert" style="display: none;"></div>
+
+            <div class="mb-3">
+              <label for="return-date-input" class="form-label fw-semibold">Actual Return Date <span class="text-danger">*</span></label>
+              <input type="date" class="form-control" id="return-date-input" required onchange="checkFinePreview(document.getElementById('return-due-date-display').textContent, this.value)">
+            </div>
+
+            <div class="mb-3">
+              <label for="return-notes" class="form-label fw-semibold">Return Notes (Condition, Remarks)</label>
+              <input type="text" class="form-control" id="return-notes" placeholder="e.g. Returned in good condition">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-success" id="btn-confirm-return">
+              <i class="bi bi-arrow-return-left me-1"></i> Accept Return & Update Stock
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/issues.js"></script>
+</body>
+</html>
